@@ -1,0 +1,55 @@
+version: 1
+
+# KNOWLEDGE graph access. Allow-only model (everything ungranted is denied).
+# Readable by both agents + humans; writes only on unprotected (ingest) branches;
+# merges into protected main are human-only.
+# NOTE: invoke_query is graph-scoped -> its rules must NOT carry branch_scope.
+
+groups:
+  humans: [act-admin, act-reviewer]
+  agents: [act-content-agent, act-gtm-agent]
+  ingest: [act-ingest]
+
+protected_branches:
+  - main
+
+rules:
+  - id: humans-read
+    allow:
+      actors: { group: humans }
+      actions: [read, export]
+      branch_scope: any
+
+  - id: humans-invoke
+    allow:
+      actors: { group: humans }
+      actions: [invoke_query]
+
+  - id: agents-read
+    allow:
+      actors: { group: agents }
+      actions: [read]
+      branch_scope: any
+
+  - id: agents-invoke
+    allow:
+      actors: { group: agents }
+      actions: [invoke_query]
+
+  - id: ingest-write-unprotected
+    allow:
+      actors: { group: ingest }
+      actions: [read, change]
+      branch_scope: unprotected
+
+  - id: ingest-create-branch
+    allow:
+      actors: { group: ingest }
+      actions: [branch_create]
+      target_branch_scope: unprotected
+
+  - id: humans-govern-branches
+    allow:
+      actors: { group: humans }
+      actions: [branch_create, branch_delete, branch_merge, schema_apply]
+      target_branch_scope: any

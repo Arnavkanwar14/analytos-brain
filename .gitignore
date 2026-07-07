@@ -1,0 +1,26 @@
+# Secrets — NEVER commit
+.env
+.env.*
+*.credentials
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Omnigraph derived state (cluster ledger + graph data live in object storage / local FS)
+cluster/__cluster/
+cluster/graphs/
+
+# Ingestion run manifests (contain diffs that may include internal content)
+runs/
+
+# Editor / OS
+.DS_Store
+*.swp
+
+# LLM/embed cache (derived)
+.cache/

@@ -1,0 +1,13 @@
+version: 1
+
+# Server-level bundle. Gates GET /graphs (graph_list). Everyone may enumerate
+# graph names (topology only, not data); per-graph reads are still Cedar-gated.
+
+groups:
+  everyone: [act-admin, act-reviewer, act-content-agent, act-gtm-agent, act-ingest]
+
+rules:
+  - id: everyone-can-list-graphs
+    allow:
+      actors: { group: everyone }
+      actions: [graph_list]

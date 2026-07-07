@@ -1,0 +1,106 @@
+// KNOWLEDGE graph stored queries (reads). Comments use //.
+
+query list_products() @description("All products with headline attributes") {
+    match { $p: Product }
+    return {
+        $p.slug, $p.name, $p.category, $p.status, $p.site,
+        $p.description, $p.displacement_target, $p.licensing, $p.target_buyer
+    }
+    order { $p.slug asc }
+    limit 100
+}
+
+query get_product($slug: String) @description("Single product by slug") {
+    match { $p: Product { slug: $slug } }
+    return {
+        $p.slug, $p.name, $p.category, $p.status, $p.site,
+        $p.description, $p.displacement_target, $p.licensing, $p.target_buyer, $p.source_doc
+    }
+}
+
+query list_features() @description("All features") {
+    match { $f: Feature }
+    return { $f.slug, $f.name, $f.product_slug, $f.description }
+    order { $f.slug asc }
+    limit 200
+}
+
+query product_features($slug: String) @description("Features of a product") {
+    match {
+        $p: Product { slug: $slug }
+        $p hasFeature $f
+    }
+    return { $f.slug, $f.name, $f.description }
+    order { $f.slug asc }
+    limit 100
+}
+
+query list_proof_points() @description("All proof points (structured metrics)") {
+    match { $pp: ProofPoint }
+    return {
+        $pp.slug, $pp.statement, $pp.product_slug, $pp.metric, $pp.magnitude, $pp.unit,
+        $pp.direction, $pp.value_before, $pp.value_after, $pp.window,
+        $pp.approved_external, $pp.source_doc, $pp.source_thread
+    }
+    limit 200
+}
+
+query list_approved_proof_points() @description("Only externally-approved proof points") {
+    match { $pp: ProofPoint { approved_external: true } }
+    return {
+        $pp.slug, $pp.statement, $pp.product_slug, $pp.metric, $pp.magnitude, $pp.unit,
+        $pp.direction, $pp.value_before, $pp.value_after, $pp.window, $pp.source_doc
+    }
+    limit 200
+}
+
+query product_proof_points($slug: String) @description("Proof points for a product") {
+    match {
+        $p: Product { slug: $slug }
+        $p provenBy $pp
+    }
+    return {
+        $pp.slug, $pp.statement, $pp.metric, $pp.magnitude, $pp.unit, $pp.direction,
+        $pp.value_before, $pp.value_after, $pp.window, $pp.approved_external, $pp.source_thread
+    }
+    limit 100
+}
+
+query list_competitors() @description("All competitors") {
+    match { $c: Competitor }
+    return { $c.slug, $c.name, $c.note }
+    limit 100
+}
+
+query product_competitors($slug: String) @description("Competitors a product displaces") {
+    match {
+        $p: Product { slug: $slug }
+        $p displaces $c
+    }
+    return { $c.slug, $c.name, $c.note }
+    limit 100
+}
+
+// ---- Hybrid retrieval: vector ANN (nearest) + full-text (bm25) fused with rrf ----
+// The query string is auto-embedded at runtime via the cluster's gemini embedder;
+// rrf() fuses the vector and bm25 rankings into one order (RFC/canonical form).
+query search_products($q: String) @description("Hybrid product search (vector+bm25 RRF)") {
+    match { $p: Product }
+    return { $p.slug, $p.name, $p.description }
+    order { rrf(nearest($p.embedding, $q), bm25($p.description, $q)) }
+    limit 8
+}
+
+query search_features($q: String) @description("Hybrid feature search (vector+bm25 RRF)") {
+    match { $f: Feature }
+    return { $f.slug, $f.name, $f.description }
+    order { rrf(nearest($f.embedding, $q), bm25($f.description, $q)) }
+    limit 8
+}
+
+query search_proof_points($q: String) @description("Hybrid proof-point search (vector+bm25 RRF)") {
+    match { $pp: ProofPoint }
+    return { $pp.slug, $pp.statement, $pp.product_slug, $pp.approved_external }
+    order { rrf(nearest($pp.embedding, $q), bm25($pp.statement, $q)) }
+    limit 8
+}

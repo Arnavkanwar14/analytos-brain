@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Analytos Brain Dashboard + HITL</title>
+    <link rel="stylesheet" href="/styles.css?v=2026-07-07-agent-inputs-1" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Analytos Brain</h1>
+        <p>Governed context layer on Omnigraph: branch ingest, HITL review, approved-main querying.</p>
+        <p id="uiBuildMarker" class="muted">UI build: 2026-07-07-agent-inputs-1</p>
+      </div>
+      <div id="globalStatus" class="status muted">Ready</div>
+    </header>
+
+    <main class="layout">
+      <section class="card span-2">
+        <h2>Health + Stats</h2>
+        <div id="healthMsg" class="status muted"></div>
+        <div id="health"></div>
+        <pre id="stats"></pre>
+      </section>
+
+      <section class="card span-2">
+        <h2>Ingest To Branch</h2>
+        <p class="muted">Always writes to <code>ingest/&lt;run-id&gt;</code>. Never writes directly to <code>main</code>.</p>
+        <div class="row">
+          <input id="ingestRunId" placeholder="run id (optional, e.g. demo-02)" />
+          <button id="ingestBtn">Ingest</button>
+        </div>
+        <div class="row">
+          <input id="ingestDocs" placeholder="docs (optional, comma-separated seed-data filenames)" />
+          <label class="checkbox"><input id="ingestUseLlm" type="checkbox" /> Use LLM extraction</label>
+        </div>
+        <div id="ingestStatus" class="status muted"></div>
+        <pre id="ingestLog"></pre>
+      </section>
+
+      <section class="card span-2">
+        <h2>Run Governance Actions</h2>
+        <div class="row">
+          <button id="refreshRuns">Refresh Runs</button>
+          <label for="actorRole">Actor</label>
+          <select id="actorRole">
+            <option value="reviewer">Human Reviewer</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div id="runsStatus" class="status muted"></div>
+        <ul id="runs"></ul>
+        <h3>Selected Run / Branch Diff</h3>
+        <pre id="runDetail"></pre>
+      </section>
+
+      <section class="card span-2">
+        <h2>Hybrid Search</h2>
+        <div class="row">
+          <input id="searchInput" placeholder="Search approved main data (hybrid vector + BM25)..." />
+          <button id="searchBtn">Search</button>
+        </div>
+        <div id="searchMeta" class="status muted"></div>
+        <ul id="searchResults"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Entity Browser Tabs + Filters</h2>
+        <div class="tabs">
+          <button data-tab="products" class="tab active">Products</button>
+          <button data-tab="proof_points" class="tab">Proof Points</button>
+          <button data-tab="features" class="tab">Features</button>
+          <button data-tab="icp" class="tab">ICP Segments</button>
+          <button data-tab="personas" class="tab">Personas</button>
+        </div>
+        <input id="entityFilter" placeholder="Filter current tab..." />
+        <pre id="entities"></pre>
+      </section>
+
+      <section class="card">
+        <h2>Recent Changes</h2>
+        <p class="muted">Commits and run branches with actor and time.</p>
+        <div class="split-list">
+          <div>
+            <h3>Branches</h3>
+            <ul id="recentBranches"></ul>
+          </div>
+          <div>
+            <h3>Commits</h3>
+            <ul id="recentCommits"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Role Scope Check</h2>
+        <button id="scopeBtn">Check Visibility</button>
+        <div id="scopeStatus" class="status muted"></div>
+        <pre id="scopeResults"></pre>
+      </section>
+
+      <section class="card">
+        <h2>Agent Run Actions</h2>
+        <div class="row">
+          <input id="contentTopic" placeholder="Blog topic (optional)" />
+        </div>
+        <div class="row">
+          <label for="gtmProduct">Prospect Product</label>
+          <select id="gtmProduct">
+            <option value="">Auto-select from approved products (default)</option>
+          </select>
+        </div>
+        <div class="row">
+          <button id="contentAgentBtn">Generate Blog Draft</button>
+          <button id="gtmAgentBtn">Generate Prospect Brief</button>
+        </div>
+        <div id="agentStatus" class="status muted"></div>
+        <pre id="agentOutput"></pre>
+      </section>
+    </main>
+
+    <script src="/app.js?v=2026-07-07-agent-inputs-1"></script>
+  </body>
+</html>

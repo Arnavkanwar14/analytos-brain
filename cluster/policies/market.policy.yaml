@@ -1,0 +1,54 @@
+version: 1
+
+# MARKET graph access. gtm-agent CAN read; content-agent is intentionally
+# absent from every group -> denied by default (demonstrates role separation).
+# NOTE: invoke_query is graph-scoped -> its rules must NOT carry branch_scope.
+
+groups:
+  humans: [act-admin, act-reviewer]
+  gtm: [act-gtm-agent]
+  ingest: [act-ingest]
+
+protected_branches:
+  - main
+
+rules:
+  - id: humans-read
+    allow:
+      actors: { group: humans }
+      actions: [read, export]
+      branch_scope: any
+
+  - id: humans-invoke
+    allow:
+      actors: { group: humans }
+      actions: [invoke_query]
+
+  - id: gtm-read
+    allow:
+      actors: { group: gtm }
+      actions: [read]
+      branch_scope: any
+
+  - id: gtm-invoke
+    allow:
+      actors: { group: gtm }
+      actions: [invoke_query]
+
+  - id: ingest-write-unprotected
+    allow:
+      actors: { group: ingest }
+      actions: [read, change]
+      branch_scope: unprotected
+
+  - id: ingest-create-branch
+    allow:
+      actors: { group: ingest }
+      actions: [branch_create]
+      target_branch_scope: unprotected
+
+  - id: humans-govern-branches
+    allow:
+      actors: { group: humans }
+      actions: [branch_create, branch_delete, branch_merge, schema_apply]
+      target_branch_scope: any

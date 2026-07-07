@@ -1,0 +1,33 @@
+// Analytos Brain :: INTERNAL graph
+// Raw email threads, people, and internal decisions. Human/admin only.
+// BOTH agents are denied read here -> this is how "content-agent cannot see
+// EmailThread / client names / internal-only content" is enforced by Cedar.
+
+node EmailThread {
+    slug: String @key
+    subject: String
+    summary: String?
+    date: String?
+    participants: [String]?
+    body: String?                    // internal-only raw content
+    confidential: Bool
+}
+
+node Person {
+    slug: String @key
+    name: String
+    email: String?
+    org: String?
+}
+
+node Decision {
+    slug: String @key
+    statement: String
+    rationale: String?
+    category: String?                // positioning | gtm | roadmap
+    source_thread: String?           // slug ref to the EmailThread it came from
+}
+
+edge AuthoredBy: EmailThread -> Person
+edge DiscussedIn: Decision -> EmailThread
+edge DecidedBy: Decision -> Person

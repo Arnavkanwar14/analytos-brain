@@ -1,0 +1,44 @@
+version: 1
+
+# INTERNAL graph access. NO agent group exists here, so BOTH content-agent and
+# gtm-agent are denied read/invoke_query by default. Only humans (and the ingest
+# actor on unprotected branches) may touch it. This is the Cedar enforcement of
+# "agents can never see EmailThread / client names / internal-only content".
+# NOTE: invoke_query is graph-scoped -> its rules must NOT carry branch_scope.
+
+groups:
+  humans: [act-admin, act-reviewer]
+  ingest: [act-ingest]
+
+protected_branches:
+  - main
+
+rules:
+  - id: humans-read
+    allow:
+      actors: { group: humans }
+      actions: [read, export]
+      branch_scope: any
+
+  - id: humans-invoke
+    allow:
+      actors: { group: humans }
+      actions: [invoke_query]
+
+  - id: ingest-write-unprotected
+    allow:
+      actors: { group: ingest }
+      actions: [read, change]
+      branch_scope: unprotected
+
+  - id: ingest-create-branch
+    allow:
+      actors: { group: ingest }
+      actions: [branch_create]
+      target_branch_scope: unprotected
+
+  - id: humans-govern-branches
+    allow:
+      actors: { group: humans }
+      actions: [branch_create, branch_delete, branch_merge, schema_apply]
+      target_branch_scope: any

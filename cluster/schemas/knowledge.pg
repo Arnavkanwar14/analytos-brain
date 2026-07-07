@@ -1,0 +1,57 @@
+// Analytos Brain :: KNOWLEDGE graph
+// External-approved product truth. Readable by content-agent + gtm-agent + humans.
+// Comments use // (never #). Types Uppercase, edges PascalCase (traversed lowerCamelCase).
+
+node Product {
+    slug: String @key
+    name: String
+    category: String?
+    site: String?
+    status: String?
+    description: String?
+    displacement_target: String?   // primary competitor / approach displaced
+    licensing: String?             // e.g. perpetual / on-prem angle
+    target_buyer: String?
+    source_doc: String?
+    embedding: Vector(768)? @embed("description", model="gemini-embedding-001")
+}
+
+node Feature {
+    slug: String @key
+    name: String
+    product_slug: String?          // owning product (also modelled via HasFeature edge)
+    description: String?
+    source_doc: String?
+    embedding: Vector(768)? @embed("description", model="gemini-embedding-001")
+}
+
+// Metrics captured as STRUCTURED proof points (not blobs): a claim plus the
+// numbers behind it, plus provenance and an external-approval gate.
+node ProofPoint {
+    slug: String @key
+    statement: String              // human-readable claim
+    product_slug: String?
+    metric: String?                // what is measured (e.g. "on-hand inventory value")
+    magnitude: F64?                // single numeric magnitude when applicable (e.g. 21)
+    unit: String?                  // %, hours, days, USD, count, minutes
+    direction: String?             // reduction | increase | absolute | range
+    value_before: String?          // e.g. "6 hours/week" or "4-6 hours"
+    value_after: String?           // e.g. "under 1 hour/week" or "20 minutes"
+    window: String?                // e.g. "90 days"
+    approved_external: Bool        // GATE: safe to use in external content
+    source_doc: String?            // seed doc this was approved from
+    source_thread: String?         // slug ref into INTERNAL email thread (traceable, access-gated)
+    embedding: Vector(768)? @embed("statement", model="gemini-embedding-001")
+}
+
+node Competitor {
+    slug: String @key
+    name: String
+    note: String?
+    embedding: Vector(768)? @embed("note", model="gemini-embedding-001")
+}
+
+edge HasFeature: Product -> Feature
+edge ProvenBy: Product -> ProofPoint
+edge FeatureProvenBy: Feature -> ProofPoint
+edge Displaces: Product -> Competitor

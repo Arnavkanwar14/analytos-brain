@@ -1,0 +1,46 @@
+version: 1
+
+metadata:
+  name: analytos-brain
+
+# storage: omitted -> defaults to this config directory (local filesystem).
+# For the hosted instance, set e.g. storage: s3://<bucket>/clusters/analytos-brain
+# and provide the AWS_* env contract (works against RustFS/MinIO/S3/R2).
+
+# Query-time embedder for hybrid retrieval (vector nearest() auto-embeds the query
+# string). ${GEMINI_API_KEY} is resolved only at server boot, not at validate/apply.
+# Swap kind: mock for a fully-offline demo (deterministic vectors, no key).
+providers:
+  embedding:
+    default:
+      kind: gemini
+      base_url: https://generativelanguage.googleapis.com/v1beta
+      model: gemini-embedding-001
+      api_key: ${GEMINI_API_KEY}
+
+graphs:
+  knowledge:
+    schema: schemas/knowledge.pg
+    queries: queries/knowledge/
+    embedding_provider: default
+  market:
+    schema: schemas/market.pg
+    queries: queries/market/
+    embedding_provider: default
+  internal:
+    schema: schemas/internal.pg
+    queries: queries/internal/
+
+policies:
+  knowledge:
+    file: policies/knowledge.policy.yaml
+    applies_to: [knowledge]
+  market:
+    file: policies/market.policy.yaml
+    applies_to: [market]
+  internal:
+    file: policies/internal.policy.yaml
+    applies_to: [internal]
+  cluster:
+    file: policies/cluster.policy.yaml
+    applies_to: [cluster]

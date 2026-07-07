@@ -1,0 +1,60 @@
+// MARKET graph stored queries (reads). Comments use //.
+
+query list_icp_segments() @description("All ICP segments with firmographics and triggers") {
+    match { $s: ICPSegment }
+    return {
+        $s.slug, $s.name, $s.description, $s.channel,
+        $s.revenue_min_musd, $s.revenue_max_musd, $s.employees_range,
+        $s.sectors, $s.erp_footprint, $s.geography,
+        $s.trigger_signals, $s.disqualifiers, $s.applies_to_products
+    }
+    order { $s.slug asc }
+    limit 100
+}
+
+query get_icp_segment($slug: String) @description("Single ICP segment by slug") {
+    match { $s: ICPSegment { slug: $slug } }
+    return {
+        $s.slug, $s.name, $s.description, $s.channel,
+        $s.revenue_min_musd, $s.revenue_max_musd, $s.employees_range,
+        $s.sectors, $s.erp_footprint, $s.geography,
+        $s.trigger_signals, $s.disqualifiers, $s.applies_to_products
+    }
+}
+
+query list_personas() @description("All personas") {
+    match { $p: Persona }
+    return {
+        $p.slug, $p.name, $p.role_in_deal, $p.cares_about,
+        $p.winning_message, $p.losing_message, $p.economic_buyer, $p.product_slugs
+    }
+    order { $p.slug asc }
+    limit 100
+}
+
+query segment_personas($slug: String) @description("Personas attached to a segment") {
+    match {
+        $s: ICPSegment { slug: $slug }
+        $s hasPersona $p
+    }
+    return {
+        $p.slug, $p.name, $p.role_in_deal, $p.cares_about,
+        $p.winning_message, $p.losing_message, $p.economic_buyer, $p.product_slugs
+    }
+    limit 100
+}
+
+// ---- Hybrid retrieval: vector ANN (nearest) + full-text (bm25) fused with rrf ----
+query search_icp($q: String) @description("Hybrid ICP-segment search (vector+bm25 RRF)") {
+    match { $s: ICPSegment }
+    return { $s.slug, $s.name, $s.description }
+    order { rrf(nearest($s.embedding, $q), bm25($s.description, $q)) }
+    limit 8
+}
+
+query search_personas($q: String) @description("Hybrid persona search (vector+bm25 RRF)") {
+    match { $p: Persona }
+    return { $p.slug, $p.name, $p.cares_about }
+    order { rrf(nearest($p.embedding, $q), bm25($p.cares_about, $q)) }
+    limit 8
+}

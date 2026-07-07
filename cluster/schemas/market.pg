@@ -1,0 +1,37 @@
+// Analytos Brain :: MARKET graph
+// ICP + personas. Readable by gtm-agent + humans (content-agent is denied here).
+// Product links are slug references into the KNOWLEDGE graph (cross-graph edges
+// are intentionally avoided so Cedar can isolate each graph independently).
+
+node ICPSegment {
+    slug: String @key
+    name: String
+    description: String?
+    channel: String?                 // direct | multiplier
+    revenue_min_musd: F64?           // firmographic revenue floor ($M)
+    revenue_max_musd: F64?           // firmographic revenue ceiling ($M)
+    employees_range: String?
+    sectors: [String]?               // priority sectors
+    erp_footprint: [String]?
+    geography: String?
+    trigger_signals: [String]?       // "ready now" buying signals
+    disqualifiers: [String]?
+    applies_to_products: [String]?   // slug refs into KNOWLEDGE (stockly / inspectly)
+    source_doc: String?
+    embedding: Vector(768)? @embed("description", model="gemini-embedding-001")
+}
+
+node Persona {
+    slug: String @key
+    name: String
+    role_in_deal: String?            // champion | economic buyer | ...
+    cares_about: String?
+    winning_message: String?
+    losing_message: String?
+    economic_buyer: Bool?
+    product_slugs: [String]?         // slug refs into KNOWLEDGE
+    source_doc: String?
+    embedding: Vector(768)? @embed("cares_about", model="gemini-embedding-001")
+}
+
+edge HasPersona: ICPSegment -> Persona

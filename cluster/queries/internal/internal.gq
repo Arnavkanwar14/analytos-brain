@@ -1,0 +1,27 @@
+// INTERNAL graph stored queries (reads). Human/admin only via Cedar.
+
+query list_email_threads() @description("Email threads (metadata; body excluded)") {
+    match { $t: EmailThread }
+    return { $t.slug, $t.subject, $t.summary, $t.date, $t.participants, $t.confidential }
+    order { $t.slug asc }
+    limit 100
+}
+
+query get_email_thread($slug: String) @description("Full email thread including body") {
+    match { $t: EmailThread { slug: $slug } }
+    return { $t.slug, $t.subject, $t.summary, $t.date, $t.participants, $t.body, $t.confidential }
+}
+
+query list_decisions() @description("Internal decisions") {
+    match { $d: Decision }
+    return { $d.slug, $d.statement, $d.rationale, $d.category, $d.source_thread }
+    order { $d.slug asc }
+    limit 100
+}
+
+query list_people() @description("People referenced in internal threads") {
+    match { $p: Person }
+    return { $p.slug, $p.name, $p.email, $p.org }
+    order { $p.slug asc }
+    limit 100
+}

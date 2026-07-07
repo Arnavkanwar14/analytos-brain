@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "omnigraph-gtm": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modernrelay/omnigraph-mcp",
+        "--base-url",
+        "http://127.0.0.1:8080",
+        "--token",
+        "${TOKEN_GTM_AGENT}"
+      ]
+    }
+  }
+}
