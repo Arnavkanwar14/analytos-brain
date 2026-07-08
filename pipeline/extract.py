@@ -35,11 +35,13 @@ Rules:
   explicitly approves external use. Set source_doc to the document name, and source_thread
   to the related email thread slug when known (traceability).
 - Feature slug = "<product-slug>-<kebab-name>". ProofPoint slug = "<product>-<metric-keywords>-<direction>".
-- Email docs: create the EmailThread (confidential=true, include a faithful body), a Person per
+- Email docs (filename starts with `email-`): create the EmailThread (confidential=true, include a faithful body), a Person per
   participant, and a Decision per explicit instruction/decision. Keep client names and sharper
   internal-only numbers on the internal graph only.
-- Edges: {"graph","edge","from","to"} using slugs. Allowed: knowledge[HasFeature,ProvenBy,
-  FeatureProvenBy,Displaces]; market[HasPersona]; internal[AuthoredBy,DiscussedIn,DecidedBy].
+- Product, ICP, and other non-email docs: do NOT create EmailThread, Person, or Decision nodes.
+- Edges: {"graph","edge","from","to"} using slugs; direction matters. Allowed:
+  knowledge[HasFeature,ProvenBy,FeatureProvenBy,Displaces]; market[HasPersona];
+  internal[AuthoredBy: EmailThread->Person, DiscussedIn: Decision->EmailThread, DecidedBy: Decision->Person].
 """
 
 

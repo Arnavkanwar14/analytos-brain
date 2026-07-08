@@ -22,11 +22,28 @@ RUNS = ROOT / "runs"
 def new_run_id() -> str:
     return "run-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
+def _normalize_docs(docs):
+    """Accept comma-separated string or list of filenames."""
+    if docs is None:
+        return None
+    if isinstance(docs, str):
+        parts = [d.strip() for d in docs.split(",") if d.strip()]
+        return parts or None
+    if isinstance(docs, list):
+        parts = []
+        for d in docs:
+            s = d.strip() if isinstance(d, str) else str(d).strip()
+            if s:
+                parts.append(s)
+        return parts or None
+    raise TypeError(f"docs must be a comma-separated string or list, got {type(docs).__name__}")
+
+
 
 def run_ingestion(docs=None, run_id=None, use_llm=False, log=print) -> dict:
     """Core ingestion: extract -> typed mutations -> ingest branch (never main) -> diff.
     Returns the run manifest dict. Callable from CLI or the backend."""
-    docs = docs or sorted(glob.glob(str(SEED / "*.md")))
+    docs = _normalize_docs(docs) or sorted(glob.glob(str(SEED / "*.md")))
     if not docs:
         raise RuntimeError("no seed docs found")
     run_id = run_id or new_run_id()
@@ -53,7 +70,7 @@ def run_ingestion(docs=None, run_id=None, use_llm=False, log=print) -> dict:
         log(f"  extracted {name}: {len(ext.get('nodes', []))} nodes, "
             f"{len(ext.get('edges', []))} edges  [{method}]")
 
-    grouped = mutations.by_graph(mutations.normalize(agg))
+    grouped = mutations.by_graph(mutations.normalize(agg), log=log)
 
     # 1b) attach hybrid-retrieval vectors (gemini @768, cached; mock fallback). Sequential.
     embed_providers = {}

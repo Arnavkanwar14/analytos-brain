@@ -7,6 +7,18 @@ from __future__ import annotations
 import json, re
 from . import ontology
 
+# Mirrors cluster/schemas/*.pg edge declarations (src_type -> dst_type).
+EDGE_ENDPOINTS = {
+    "AuthoredBy": ("EmailThread", "Person"),
+    "DiscussedIn": ("Decision", "EmailThread"),
+    "DecidedBy": ("Decision", "Person"),
+    "HasFeature": ("Product", "Feature"),
+    "ProvenBy": ("Product", "ProofPoint"),
+    "FeatureProvenBy": ("Feature", "ProofPoint"),
+    "Displaces": ("Product", "Competitor"),
+    "HasPersona": ("ICPSegment", "Persona"),
+}
+
 
 def slugify(text: str) -> str:
     s = re.sub(r"[^a-z0-9]+", "-", (text or "").lower()).strip("-")
@@ -23,6 +35,61 @@ def _validate_node(rec: dict) -> list[str]:
         if data.get(f) in (None, ""):
             problems.append(f"{t}/{data.get('slug','?')}: missing required '{f}'")
     return problems
+
+
+def _is_email_doc(doc_name: str) -> bool:
+    return (doc_name or "").startswith("email-")
+
+
+def _drop_non_email_internal(nodes: list[dict]) -> list[dict]:
+    """LLM often hallucinates EmailThread/Person/Decision from product or ICP docs."""
+    kept = []
+    for n in nodes:
+        if n.get("graph") != "internal":
+            kept.append(n)
+            continue
+        source_doc = n.get("data", {}).get("source_doc", "")
+        if source_doc and not _is_email_doc(source_doc):
+            continue
+        kept.append(n)
+    return kept
+
+
+def _slug_type_index(nodes: list[dict]) -> dict[str, dict[str, str]]:
+    idx: dict[str, dict[str, str]] = {}
+    for n in nodes:
+        g = n["graph"]
+        idx.setdefault(g, {})[n["data"]["slug"]] = n["type"]
+    return idx
+
+
+def _fix_edge(edge: dict, slug_types: dict[str, str]) -> dict | None:
+    """Keep, reverse, or drop an edge so endpoints match the schema."""
+    edge_type = edge.get("edge")
+    expected = EDGE_ENDPOINTS.get(edge_type)
+    if expected is None:
+        return edge
+    src_type, dst_type = expected
+    from_slug, to_slug = edge["from"], edge["to"]
+    from_type = slug_types.get(from_slug)
+    to_type = slug_types.get(to_slug)
+    if from_type == src_type and to_type == dst_type:
+        return edge
+    if from_type == dst_type and to_type == src_type:
+        return {**edge, "from": to_slug, "to": from_slug}
+    return None
+
+
+def _sanitize_edges(edges: list[dict], slug_index: dict[str, dict[str, str]], log=None) -> list[dict]:
+    clean = []
+    for e in edges:
+        fixed = _fix_edge(e, slug_index.get(e["graph"], {}))
+        if fixed is None:
+            if log:
+                log(f"  [warn] dropped invalid edge {e.get('edge')}: {e.get('from')} -> {e.get('to')}")
+            continue
+        clean.append(fixed)
+    return clean
 
 
 def normalize(extraction: dict) -> dict:
@@ -46,16 +113,20 @@ def normalize(extraction: dict) -> dict:
     return {"nodes": nodes, "edges": edges}
 
 
-def by_graph(records: dict) -> dict:
+def by_graph(records: dict, log=None) -> dict:
     """Group nodes+edges per graph, deduped, and validated."""
+    nodes = _drop_non_email_internal(records["nodes"])
+    slug_index = _slug_type_index(nodes)
+    edges = _sanitize_edges(records["edges"], slug_index, log=log)
+
     out = {g: {"nodes": {}, "edges": []} for g in ontology.NODES}
     problems = []
-    for n in records["nodes"]:
+    for n in nodes:
         problems += _validate_node(n)
         g = n["graph"]
         out[g]["nodes"][(n["type"], n["data"]["slug"])] = n
     seen_edges = set()
-    for e in records["edges"]:
+    for e in edges:
         key = (e["graph"], e["edge"], e["from"], e["to"])
         if key in seen_edges:
             continue
