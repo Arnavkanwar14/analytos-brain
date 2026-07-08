@@ -35,8 +35,10 @@ fi
 export PATH="/root/.local/bin:${PATH}"
 
 if [[ "${HF_SPACE:-}" == "1" ]]; then
+  # Health must stay under HF's startup budget; bootstrap can take longer
+  # after the sidecar is healthy (ingest+approve of golden seed).
   OMNIGRAPH_HEALTH_TIMEOUT_SECS="${OMNIGRAPH_HEALTH_TIMEOUT_SECS:-30}"
-  BOOTSTRAP_TIMEOUT_SECS="${BOOTSTRAP_TIMEOUT_SECS:-15}"
+  BOOTSTRAP_TIMEOUT_SECS="${BOOTSTRAP_TIMEOUT_SECS:-120}"
 else
   OMNIGRAPH_HEALTH_TIMEOUT_SECS="${OMNIGRAPH_HEALTH_TIMEOUT_SECS:-45}"
   BOOTSTRAP_TIMEOUT_SECS="${BOOTSTRAP_TIMEOUT_SECS:-120}"
@@ -104,13 +106,12 @@ if [[ "$READY" -ne 1 ]]; then
 fi
 log "omnigraph sidecar healthy"
 
-if [[ "${HF_SPACE:-}" == "1" && -f "$ROOT/.hf-baked" ]]; then
-  log "HF baked image: skipping bootstrap"
-else
-  log "running bootstrap-if-empty (timeout=${BOOTSTRAP_TIMEOUT_SECS}s)"
-  if ! timeout "$BOOTSTRAP_TIMEOUT_SECS" python3 scripts/bootstrap_if_empty.py; then
-    log "bootstrap step timed out or failed; continuing startup"
-  fi
+# Always reseed when main is empty. Bake-at-build can leave an empty store if
+# the baked graph layer was skipped/lost, a rebuild remounted empty storage, or
+# seed landed as a pending ingest branch without approve.
+log "running bootstrap-if-empty (timeout=${BOOTSTRAP_TIMEOUT_SECS}s)"
+if ! timeout "$BOOTSTRAP_TIMEOUT_SECS" python3 scripts/bootstrap_if_empty.py; then
+  log "bootstrap step timed out or failed; continuing startup"
 fi
 
 log "starting FastAPI server on 0.0.0.0:${HF_PORT}"

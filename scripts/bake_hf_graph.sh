@@ -38,5 +38,19 @@ fi
 echo "[bake] seeding graph (golden bootstrap)"
 python3 scripts/bootstrap_if_empty.py
 
+echo "[bake] verifying non-empty main"
+python3 - <<'PY'
+from common.og import OG, OGError
+
+admin = OG("admin")
+try:
+    count = admin.query("knowledge", "list_products", branch="main").get("row_count", 0)
+except OGError as e:
+    raise SystemExit(f"[bake] ERROR cannot read products after bootstrap: {e}")
+if not count:
+    raise SystemExit("[bake] ERROR main still empty after bootstrap; refusing .hf-baked")
+print(f"[bake] verified products={count}")
+PY
+
 touch "$ROOT/.hf-baked"
 echo "[bake] done"
