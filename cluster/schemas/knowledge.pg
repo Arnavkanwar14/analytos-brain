@@ -1,13 +1,24 @@
-// Query grammar (.gq) cheat sheet — schema_get returns this .pg only; .gq files are not exposed.
-// Shape: query name($p: Type) { match { $v: NodeType { field: $p } } return { $v.field1, $v.field2 } order { $v.field asc } limit N }
-// Worked example (list_approved_proof_points from cluster/queries/knowledge):
-//   query list_approved_proof_points() {
+// ---- .gq query grammar cheat sheet (read this before calling `query`) ----
+// schema_get returns this .pg only; .gq files are not exposed.
+// query <name>($param: Type) {
+//     match { $v: NodeType { field: $param } }   // bind + filter
+//     return { $v.field1, $v.field2 }            // dotted field paths only
+//     order { $v.field asc }                     // optional
+//     limit N                                    // optional
+// }
+// Edge traversal: match { $p: Product { slug: $slug } $p provenBy $pp }
+//   (edge names are lowerCamelCase in queries even though declared
+//    PascalCase below, e.g. `edge ProvenBy` -> `$p provenBy $pp`)
+// Hybrid search requires trailing limit:
+//   order { rrf(nearest($v.embedding, $q), bm25($v.field, $q)) } limit 8
+//
+// Worked example:
+// query approvedProof() {
 //     match { $pp: ProofPoint { approved_external: true } }
-//     return { $pp.slug, $pp.statement, $pp.product_slug, $pp.metric, $pp.magnitude, $pp.unit,
-//              $pp.direction, $pp.value_before, $pp.value_after, $pp.window, $pp.source_doc }
+//     return { $pp.slug, $pp.statement, $pp.product_slug, $pp.metric,
+//               $pp.magnitude, $pp.unit, $pp.window, $pp.source_doc }
 //     limit 200
-//   }
-// Hybrid search uses: order { rrf(nearest($x.embedding, $q), bm25($x.field, $q)) } with required trailing limit N
+// }
 
 // Analytos Brain :: KNOWLEDGE graph
 // External-approved product truth. Readable by content-agent + gtm-agent + humans.
