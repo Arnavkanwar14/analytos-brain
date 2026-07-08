@@ -10,83 +10,94 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=2026-07-08-steep-1" />
+    <link rel="stylesheet" href="/styles.css?v=2026-07-08-steep-2" />
   </head>
   <body>
     <div class="page">
-      <header class="hero">
-        <div class="hero-inner">
-          <h1 class="hero-title">Analytos Brain</h1>
-          <p class="hero-subhead">
-            Governed context layer on Omnigraph — branch ingest, human-in-the-loop review, and approved-main querying.
-          </p>
-          <p id="uiBuildMarker" class="build-marker">UI build: 2026-07-08-steep-1</p>
+      <header class="hero flow-section flow-section--white">
+        <div class="container hero-layout">
+          <div class="hero-copy">
+            <h1 class="hero-title">Analytos Brain</h1>
+            <p class="hero-subhead">
+              Governed context layer on Omnigraph — branch ingest, human-in-the-loop review, and approved-main querying.
+            </p>
+            <p id="uiBuildMarker" class="build-marker">UI build: 2026-07-08-steep-2</p>
+          </div>
+          <div id="globalStatus" class="status-badge muted">Ready</div>
         </div>
-        <div id="globalStatus" class="status-badge muted">Ready</div>
       </header>
 
       <main class="dashboard">
-        <section class="band band--fog">
-          <div class="band-inner">
-            <section class="card card--elevated span-full">
+        <section class="flow-section flow-section--fog">
+          <div class="container">
+            <article class="card card--on-fog">
               <h2 class="section-title">Health + Stats</h2>
               <div id="healthMsg" class="status muted"></div>
               <div id="health" class="health-line"></div>
               <pre id="stats" class="code-block"></pre>
-            </section>
+            </article>
           </div>
         </section>
 
-        <section class="band band--mist">
-          <div class="band-inner">
-            <section class="card span-full">
+        <section class="flow-section flow-section--white">
+          <div class="container">
+            <article class="card card--on-white">
               <h2 class="section-title">Ingest To Branch</h2>
-              <p class="muted section-lead">
+              <p class="helper-text">
                 Always writes to <code>ingest/&lt;run-id&gt;</code>. Never writes directly to <code>main</code>.
               </p>
-              <div class="row">
-                <input id="ingestRunId" placeholder="run id (optional, e.g. demo-02)" />
-                <button id="ingestBtn" class="btn btn-primary">Ingest</button>
-              </div>
-              <div class="row">
-                <input id="ingestDocs" placeholder="docs (optional, comma-separated seed-data filenames)" />
-                <label class="checkbox"><input id="ingestUseLlm" type="checkbox" /> Use LLM extraction</label>
+              <div class="field-group">
+                <div class="row">
+                  <input id="ingestRunId" placeholder="run id (optional, e.g. demo-02)" />
+                  <button id="ingestBtn" class="btn btn-primary">Ingest</button>
+                </div>
+                <div class="row">
+                  <input id="ingestDocs" placeholder="docs (optional, comma-separated seed-data filenames)" />
+                  <label class="checkbox"><input id="ingestUseLlm" type="checkbox" /> Use LLM extraction</label>
+                </div>
               </div>
               <div id="ingestStatus" class="status muted"></div>
               <pre id="ingestLog" class="code-block"></pre>
-            </section>
+            </article>
           </div>
         </section>
 
-        <section class="band band--fog">
-          <div class="band-inner">
-            <div class="callout callout--blush">
-              <p class="callout-text">
-                <strong>Human-in-the-loop governance.</strong>
-                Review branch diffs, approve merges to main, or discard rejected runs — every action is scoped by actor role.
-              </p>
-            </div>
-            <section class="card span-full">
-              <h2 class="section-title">Run Governance Actions</h2>
-              <div class="row">
-                <button id="refreshRuns" class="btn btn-secondary">Refresh Runs</button>
-                <label for="actorRole" class="field-label">Actor</label>
-                <select id="actorRole">
-                  <option value="reviewer">Human Reviewer</option>
-                  <option value="admin">Admin</option>
-                </select>
+        <section class="flow-section flow-section--fog">
+          <div class="container">
+            <article class="card card--on-fog card--governance">
+              <div class="callout callout--blush">
+                <p class="callout-text">
+                  <strong>Human-in-the-loop governance.</strong>
+                  Review branch diffs, approve merges to main, or discard rejected runs — every action is scoped by actor role.
+                </p>
               </div>
-              <div id="runsStatus" class="status muted"></div>
-              <ul id="runs" class="item-list"></ul>
-              <h3 class="subsection-title">Selected Run / Branch Diff</h3>
-              <pre id="runDetail" class="code-block"></pre>
-            </section>
+
+              <h2 class="section-title">Run Governance Actions</h2>
+
+              <div class="card-block">
+                <div class="row row--toolbar">
+                  <button id="refreshRuns" class="btn btn-secondary">Refresh Runs</button>
+                  <label for="actorRole" class="field-label">Actor</label>
+                  <select id="actorRole">
+                    <option value="reviewer">Human Reviewer</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+                <div id="runsStatus" class="status muted"></div>
+                <ul id="runs" class="item-list runs-list"></ul>
+              </div>
+
+              <div class="card-block card-block--diff">
+                <h3 class="subsection-title">Selected Run / Branch Diff</h3>
+                <pre id="runDetail" class="code-block"></pre>
+              </div>
+            </article>
           </div>
         </section>
 
-        <section class="band band--mist">
-          <div class="band-inner">
-            <section class="card span-full">
+        <section class="flow-section flow-section--white">
+          <div class="container">
+            <article class="card card--on-white">
               <h2 class="section-title">Hybrid Search</h2>
               <div class="row">
                 <input id="searchInput" placeholder="Search approved main data (hybrid vector + BM25)..." />
@@ -94,14 +105,14 @@
               </div>
               <div id="searchMeta" class="status muted"></div>
               <ul id="searchResults" class="item-list"></ul>
-            </section>
+            </article>
           </div>
         </section>
 
-        <section class="band band--fog">
-          <div class="band-inner grid-2">
-            <section class="card">
-              <h2 class="section-title">Entity Browser Tabs + Filters</h2>
+        <section class="flow-section flow-section--fog">
+          <div class="container">
+            <article class="card card--on-fog">
+              <h2 class="section-title">Entity Browser</h2>
               <div class="tabs">
                 <button data-tab="products" class="tab active">Products</button>
                 <button data-tab="proof_points" class="tab">Proof Points</button>
@@ -111,57 +122,63 @@
               </div>
               <input id="entityFilter" placeholder="Filter current tab..." />
               <pre id="entities" class="code-block"></pre>
-            </section>
+            </article>
+          </div>
+        </section>
 
-            <section class="card card--elevated">
+        <section class="flow-section flow-section--white">
+          <div class="container">
+            <article class="card card--on-white card--elevated">
               <h2 class="section-title">Recent Changes</h2>
-              <p class="muted section-lead">Commits and run branches with actor and time.</p>
+              <p class="helper-text">Commits and run branches with actor and time.</p>
               <div class="split-list">
-                <div>
+                <div class="split-panel">
                   <h3 class="subsection-title">Branches</h3>
                   <ul id="recentBranches" class="item-list"></ul>
                 </div>
-                <div>
+                <div class="split-panel">
                   <h3 class="subsection-title">Commits</h3>
                   <ul id="recentCommits" class="item-list"></ul>
                 </div>
               </div>
-            </section>
+            </article>
           </div>
         </section>
 
-        <section class="band band--mist">
-          <div class="band-inner grid-2">
-            <section class="card">
+        <section class="flow-section flow-section--fog">
+          <div class="container">
+            <article class="card card--on-fog">
               <h2 class="section-title">Role Scope Check</h2>
-              <button id="scopeBtn" class="btn btn-secondary">Check Visibility</button>
+              <div class="row">
+                <button id="scopeBtn" class="btn btn-secondary">Check Visibility</button>
+              </div>
               <div id="scopeStatus" class="status muted"></div>
               <pre id="scopeResults" class="code-block"></pre>
-            </section>
+            </article>
+          </div>
+        </section>
 
-            <section class="card">
+        <section class="flow-section flow-section--white">
+          <div class="container">
+            <article class="card card--on-white">
               <h2 class="section-title">Agent Run Actions</h2>
-              <div class="row">
+              <div class="row row--agent">
                 <input id="contentTopic" placeholder="Blog topic (optional)" />
-              </div>
-              <div class="row">
                 <label for="gtmProduct" class="field-label">Prospect Product</label>
                 <select id="gtmProduct">
                   <option value="">Auto-select from approved products (default)</option>
                 </select>
-              </div>
-              <div class="row">
                 <button id="contentAgentBtn" class="btn btn-primary">Generate Blog Draft</button>
                 <button id="gtmAgentBtn" class="btn btn-secondary">Generate Prospect Brief</button>
               </div>
               <div id="agentStatus" class="status muted"></div>
               <pre id="agentOutput" class="code-block"></pre>
-            </section>
+            </article>
           </div>
         </section>
       </main>
     </div>
 
-    <script src="/app.js?v=2026-07-08-steep-1"></script>
+    <script src="/app.js?v=2026-07-08-steep-2"></script>
   </body>
 </html>

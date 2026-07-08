@@ -153,7 +153,14 @@ async function loadRuns() {
   for (const run of data.runs || []) {
     const li = document.createElement("li");
     li.className = "run-item";
-    li.textContent = `${run.run_id} [${run.status}] branch=${run.branch || "n/a"} docs=${(run.docs || []).join(", ")}`;
+
+    const meta = document.createElement("span");
+    meta.className = "run-meta";
+    meta.textContent = `${run.run_id} [${run.status}] branch=${run.branch || "n/a"} docs=${(run.docs || []).join(", ")}`;
+    li.appendChild(meta);
+
+    const actions = document.createElement("div");
+    actions.className = "run-actions";
 
     const viewBtn = document.createElement("button");
     viewBtn.className = "btn btn-secondary btn-sm";
@@ -195,12 +202,10 @@ async function loadRuns() {
       await loadRecent();
     };
 
-    li.append(" ");
-    li.appendChild(viewBtn);
-    li.append(" ");
-    li.appendChild(approveBtn);
-    li.append(" ");
-    li.appendChild(rejectBtn);
+    actions.appendChild(viewBtn);
+    actions.appendChild(approveBtn);
+    actions.appendChild(rejectBtn);
+    li.appendChild(actions);
     ul.appendChild(li);
   }
 }
