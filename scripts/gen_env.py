@@ -39,10 +39,20 @@ def main():
     # actor_id -> token  (what the server consumes)
     bearer_map = {actor: tokens[var] for var, actor in ACTORS.items()}
 
+    on_hf = (
+        os.environ.get("HF_SPACE") == "1"
+        or bool(os.environ.get("SPACE_ID"))
+        or os.environ.get("PORT") == "7860"
+    )
+    og_url = "http://127.0.0.1:8080"
+    og_bind = "127.0.0.1:8080"
+    if on_hf:
+        print("HF Space detected — locking Omnigraph to localhost:8080")
+
     lines = [
         "# Analytos Brain — secrets & runtime config. GIT-IGNORED. Do not commit.",
-        "OMNIGRAPH_BASE_URL=http://127.0.0.1:8080",
-        "OMNIGRAPH_BIND=127.0.0.1:8080",
+        f"OMNIGRAPH_BASE_URL={og_url}",
+        f"OMNIGRAPH_BIND={og_bind}",
         f"GEMINI_API_KEY={pick('GEMINI_API_KEY', existing)}",
         f"GROQ_API_KEY={pick('GROQ_API_KEY', existing)}",
         f"GEMINI_MODEL={pick('GEMINI_MODEL', existing, 'gemini-2.0-flash')}",

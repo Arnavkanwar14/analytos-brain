@@ -17,9 +17,24 @@ def load_env():
             env[k.strip()] = v.strip()
     return env
 
+def _is_hf_space(env: dict) -> bool:
+    if env.get("HF_SPACE") == "1":
+        return True
+    if env.get("SPACE_ID"):
+        return True
+    return env.get("PORT") == "7860"
+
+
 def main():
     env = load_env()
     bind = env.get("OMNIGRAPH_BIND", "127.0.0.1:8080")
+    if _is_hf_space(env):
+        host = bind.rsplit(":", 1)[0]
+        if host not in ("127.0.0.1", "localhost", "::1"):
+            print(f"ERROR: HF Space forbids omnigraph bind {bind!r}", file=sys.stderr)
+            return 1
+        bind = "127.0.0.1:8080"
+        env["OMNIGRAPH_BIND"] = bind
     if "OMNIGRAPH_SERVER_BEARER_TOKENS_JSON" not in env:
         print("ERROR: tokens not found; run gen_env.py first", file=sys.stderr)
         return 1

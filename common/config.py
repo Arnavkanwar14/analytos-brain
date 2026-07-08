@@ -1,8 +1,11 @@
 """Shared config + secrets loading for the Analytos Brain (pipeline, backend, agents)."""
 import os, pathlib, functools
+from urllib.parse import urlparse
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ENV_PATH = ROOT / ".env"
+LOCALHOST_OG_BIND = "127.0.0.1:8080"
+LOCALHOST_OG_URL = "http://127.0.0.1:8080"
 
 
 @functools.lru_cache(maxsize=1)
@@ -21,7 +24,45 @@ def get(key: str, default: str | None = None) -> str | None:
     return env().get(key, default)
 
 
-BASE_URL = get("OMNIGRAPH_BASE_URL", "http://127.0.0.1:8080")
+
+
+def is_hf_space() -> bool:
+    if get("HF_SPACE") == "1":
+        return True
+    if get("SPACE_ID"):
+        return True
+    return get("PORT") == "7860"
+
+
+def _localhost_host(host: str | None) -> bool:
+    return (host or "").lower() in {"127.0.0.1", "localhost", "::1"}
+
+
+def assert_localhost_og_url(url: str) -> str:
+    host = urlparse(url).hostname
+    if not _localhost_host(host):
+        raise RuntimeError(
+            f"HF Space requires Omnigraph on localhost only, got {url!r}"
+        )
+    return url.rstrip("/")
+
+
+def resolve_omnigraph_base_url() -> str:
+    url = get("OMNIGRAPH_BASE_URL", LOCALHOST_OG_URL) or LOCALHOST_OG_URL
+    if is_hf_space():
+        return assert_localhost_og_url(url)
+    return url.rstrip("/")
+
+
+def resolve_omnigraph_bind() -> str:
+    bind = get("OMNIGRAPH_BIND", LOCALHOST_OG_BIND) or LOCALHOST_OG_BIND
+    if is_hf_space():
+        host = bind.rsplit(":", 1)[0]
+        if not _localhost_host(host):
+            return LOCALHOST_OG_BIND
+    return bind
+
+BASE_URL = resolve_omnigraph_base_url()
 
 # actor role -> bearer-token env var
 TOKENS = {

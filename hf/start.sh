@@ -23,13 +23,24 @@ PY2
 ROOT=/root/analytos-brain
 cd "$ROOT"
 
-export OMNIGRAPH_BASE_URL="${OMNIGRAPH_BASE_URL:-http://127.0.0.1:8080}"
-export OMNIGRAPH_BIND="${OMNIGRAPH_BIND:-127.0.0.1:8080}"
 export HF_PORT="${PORT:-7860}"
+if [[ "${HF_SPACE:-}" == "1" ]] || [[ -n "${SPACE_ID:-}" ]] || [[ "${PORT:-}" == "7860" ]]; then
+  export HF_SPACE=1
+  export OMNIGRAPH_BASE_URL="http://127.0.0.1:8080"
+  export OMNIGRAPH_BIND="127.0.0.1:8080"
+else
+  export OMNIGRAPH_BASE_URL="${OMNIGRAPH_BASE_URL:-http://127.0.0.1:8080}"
+  export OMNIGRAPH_BIND="${OMNIGRAPH_BIND:-127.0.0.1:8080}"
+fi
 export PATH="/root/.local/bin:${PATH}"
 
-OMNIGRAPH_HEALTH_TIMEOUT_SECS="${OMNIGRAPH_HEALTH_TIMEOUT_SECS:-45}"
-BOOTSTRAP_TIMEOUT_SECS="${BOOTSTRAP_TIMEOUT_SECS:-120}"
+if [[ "${HF_SPACE:-}" == "1" ]]; then
+  OMNIGRAPH_HEALTH_TIMEOUT_SECS="${OMNIGRAPH_HEALTH_TIMEOUT_SECS:-30}"
+  BOOTSTRAP_TIMEOUT_SECS="${BOOTSTRAP_TIMEOUT_SECS:-15}"
+else
+  OMNIGRAPH_HEALTH_TIMEOUT_SECS="${OMNIGRAPH_HEALTH_TIMEOUT_SECS:-45}"
+  BOOTSTRAP_TIMEOUT_SECS="${BOOTSTRAP_TIMEOUT_SECS:-120}"
+fi
 OMNIGRAPH_LOG_FILE="${OMNIGRAPH_LOG_FILE:-/tmp/omnigraph-server.log}"
 
 cleanup() {
@@ -42,7 +53,7 @@ trap cleanup EXIT INT TERM
 
 log "startup script initialized"
 log "cwd=$ROOT"
-log "PORT=$HF_PORT OMNIGRAPH_BASE_URL=$OMNIGRAPH_BASE_URL"
+log "HF_SPACE=${HF_SPACE:-0} PORT=$HF_PORT OMNIGRAPH_BIND=$OMNIGRAPH_BIND OMNIGRAPH_BASE_URL=$OMNIGRAPH_BASE_URL"
 
 for cmd in python3 curl omnigraph omnigraph-server timeout; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
@@ -54,8 +65,12 @@ done
 log "generating .env"
 python3 scripts/gen_env.py
 
-log "applying cluster config"
-python3 scripts/apply_cluster.py
+if [[ "${HF_SPACE:-}" == "1" && -f "$ROOT/.hf-baked" ]]; then
+  log "HF baked image: skipping cluster apply"
+else
+  log "applying cluster config"
+  python3 scripts/apply_cluster.py
+fi
 
 log "starting omnigraph sidecar"
 python3 scripts/start_server.py >"$OMNIGRAPH_LOG_FILE" 2>&1 &
@@ -89,10 +104,14 @@ if [[ "$READY" -ne 1 ]]; then
 fi
 log "omnigraph sidecar healthy"
 
-log "running bootstrap-if-empty (timeout=${BOOTSTRAP_TIMEOUT_SECS}s)"
-if ! timeout "$BOOTSTRAP_TIMEOUT_SECS" python3 scripts/bootstrap_if_empty.py; then
-  log "bootstrap step timed out or failed; continuing startup"
+if [[ "${HF_SPACE:-}" == "1" && -f "$ROOT/.hf-baked" ]]; then
+  log "HF baked image: skipping bootstrap"
+else
+  log "running bootstrap-if-empty (timeout=${BOOTSTRAP_TIMEOUT_SECS}s)"
+  if ! timeout "$BOOTSTRAP_TIMEOUT_SECS" python3 scripts/bootstrap_if_empty.py; then
+    log "bootstrap step timed out or failed; continuing startup"
+  fi
 fi
 
-log "starting FastAPI server"
+log "starting FastAPI server on 0.0.0.0:${HF_PORT}"
 exec python3 -m uvicorn backend.app:app --host 0.0.0.0 --port "$HF_PORT"

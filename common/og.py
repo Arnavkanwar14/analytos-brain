@@ -18,7 +18,10 @@ class OGError(RuntimeError):
 class OG:
     def __init__(self, role: str = "admin", base_url: str | None = None):
         self.role = role
-        self.base = (base_url or config.BASE_URL).rstrip("/")
+        resolved = base_url or config.resolve_omnigraph_base_url()
+        if config.is_hf_space():
+            resolved = config.assert_localhost_og_url(resolved)
+        self.base = resolved.rstrip("/")
         self.token = config.token(role)
         self.s = requests.Session()
         self.s.headers.update({
