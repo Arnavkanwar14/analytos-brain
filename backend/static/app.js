@@ -22,13 +22,15 @@ function show(id, value) {
 
 function setStatus(id, message, kind = "muted") {
   const el = document.getElementById(id);
-  el.className = `status ${kind}`;
+  const baseClass = id === "globalStatus" ? "status-badge" : "status";
+  el.className = `${baseClass} ${kind}`;
   el.textContent = message;
 }
 
 function setStatusHtml(id, html, kind = "muted") {
   const el = document.getElementById(id);
-  el.className = `status ${kind}`;
+  const baseClass = id === "globalStatus" ? "status-badge" : "status";
+  el.className = `${baseClass} ${kind}`;
   el.innerHTML = html;
 }
 
@@ -154,10 +156,12 @@ async function loadRuns() {
     li.textContent = `${run.run_id} [${run.status}] branch=${run.branch || "n/a"} docs=${(run.docs || []).join(", ")}`;
 
     const viewBtn = document.createElement("button");
+    viewBtn.className = "btn btn-secondary btn-sm";
     viewBtn.textContent = "Show Diff";
     viewBtn.onclick = () => viewRunDiff(run.run_id, run.branch);
 
     const approveBtn = document.createElement("button");
+    approveBtn.className = "btn btn-primary btn-sm";
     approveBtn.textContent = "Approve & Merge";
     approveBtn.onclick = async () => {
       const result = await withAction("runsStatus", `Approving ${run.run_id}`, async () =>
@@ -178,6 +182,7 @@ async function loadRuns() {
     };
 
     const rejectBtn = document.createElement("button");
+    rejectBtn.className = "btn btn-secondary btn-sm";
     rejectBtn.textContent = "Reject / Discard";
     rejectBtn.onclick = async () => {
       await withAction("runsStatus", `Discarding ${run.run_id}`, async () =>

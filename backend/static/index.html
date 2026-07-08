@@ -4,122 +4,164 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Analytos Brain Dashboard + HITL</title>
-    <link rel="stylesheet" href="/styles.css?v=2026-07-07-agent-inputs-1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css?v=2026-07-08-steep-1" />
   </head>
   <body>
-    <header class="app-header">
-      <div>
-        <h1>Analytos Brain</h1>
-        <p>Governed context layer on Omnigraph: branch ingest, HITL review, approved-main querying.</p>
-        <p id="uiBuildMarker" class="muted">UI build: 2026-07-07-agent-inputs-1</p>
-      </div>
-      <div id="globalStatus" class="status muted">Ready</div>
-    </header>
-
-    <main class="layout">
-      <section class="card span-2">
-        <h2>Health + Stats</h2>
-        <div id="healthMsg" class="status muted"></div>
-        <div id="health"></div>
-        <pre id="stats"></pre>
-      </section>
-
-      <section class="card span-2">
-        <h2>Ingest To Branch</h2>
-        <p class="muted">Always writes to <code>ingest/&lt;run-id&gt;</code>. Never writes directly to <code>main</code>.</p>
-        <div class="row">
-          <input id="ingestRunId" placeholder="run id (optional, e.g. demo-02)" />
-          <button id="ingestBtn">Ingest</button>
+    <div class="page">
+      <header class="hero">
+        <div class="hero-inner">
+          <h1 class="hero-title">Analytos Brain</h1>
+          <p class="hero-subhead">
+            Governed context layer on Omnigraph — branch ingest, human-in-the-loop review, and approved-main querying.
+          </p>
+          <p id="uiBuildMarker" class="build-marker">UI build: 2026-07-08-steep-1</p>
         </div>
-        <div class="row">
-          <input id="ingestDocs" placeholder="docs (optional, comma-separated seed-data filenames)" />
-          <label class="checkbox"><input id="ingestUseLlm" type="checkbox" /> Use LLM extraction</label>
-        </div>
-        <div id="ingestStatus" class="status muted"></div>
-        <pre id="ingestLog"></pre>
-      </section>
+        <div id="globalStatus" class="status-badge muted">Ready</div>
+      </header>
 
-      <section class="card span-2">
-        <h2>Run Governance Actions</h2>
-        <div class="row">
-          <button id="refreshRuns">Refresh Runs</button>
-          <label for="actorRole">Actor</label>
-          <select id="actorRole">
-            <option value="reviewer">Human Reviewer</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
-        <div id="runsStatus" class="status muted"></div>
-        <ul id="runs"></ul>
-        <h3>Selected Run / Branch Diff</h3>
-        <pre id="runDetail"></pre>
-      </section>
-
-      <section class="card span-2">
-        <h2>Hybrid Search</h2>
-        <div class="row">
-          <input id="searchInput" placeholder="Search approved main data (hybrid vector + BM25)..." />
-          <button id="searchBtn">Search</button>
-        </div>
-        <div id="searchMeta" class="status muted"></div>
-        <ul id="searchResults"></ul>
-      </section>
-
-      <section class="card">
-        <h2>Entity Browser Tabs + Filters</h2>
-        <div class="tabs">
-          <button data-tab="products" class="tab active">Products</button>
-          <button data-tab="proof_points" class="tab">Proof Points</button>
-          <button data-tab="features" class="tab">Features</button>
-          <button data-tab="icp" class="tab">ICP Segments</button>
-          <button data-tab="personas" class="tab">Personas</button>
-        </div>
-        <input id="entityFilter" placeholder="Filter current tab..." />
-        <pre id="entities"></pre>
-      </section>
-
-      <section class="card">
-        <h2>Recent Changes</h2>
-        <p class="muted">Commits and run branches with actor and time.</p>
-        <div class="split-list">
-          <div>
-            <h3>Branches</h3>
-            <ul id="recentBranches"></ul>
+      <main class="dashboard">
+        <section class="band band--fog">
+          <div class="band-inner">
+            <section class="card card--elevated span-full">
+              <h2 class="section-title">Health + Stats</h2>
+              <div id="healthMsg" class="status muted"></div>
+              <div id="health" class="health-line"></div>
+              <pre id="stats" class="code-block"></pre>
+            </section>
           </div>
-          <div>
-            <h3>Commits</h3>
-            <ul id="recentCommits"></ul>
+        </section>
+
+        <section class="band band--mist">
+          <div class="band-inner">
+            <section class="card span-full">
+              <h2 class="section-title">Ingest To Branch</h2>
+              <p class="muted section-lead">
+                Always writes to <code>ingest/&lt;run-id&gt;</code>. Never writes directly to <code>main</code>.
+              </p>
+              <div class="row">
+                <input id="ingestRunId" placeholder="run id (optional, e.g. demo-02)" />
+                <button id="ingestBtn" class="btn btn-primary">Ingest</button>
+              </div>
+              <div class="row">
+                <input id="ingestDocs" placeholder="docs (optional, comma-separated seed-data filenames)" />
+                <label class="checkbox"><input id="ingestUseLlm" type="checkbox" /> Use LLM extraction</label>
+              </div>
+              <div id="ingestStatus" class="status muted"></div>
+              <pre id="ingestLog" class="code-block"></pre>
+            </section>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="card">
-        <h2>Role Scope Check</h2>
-        <button id="scopeBtn">Check Visibility</button>
-        <div id="scopeStatus" class="status muted"></div>
-        <pre id="scopeResults"></pre>
-      </section>
+        <section class="band band--fog">
+          <div class="band-inner">
+            <div class="callout callout--blush">
+              <p class="callout-text">
+                <strong>Human-in-the-loop governance.</strong>
+                Review branch diffs, approve merges to main, or discard rejected runs — every action is scoped by actor role.
+              </p>
+            </div>
+            <section class="card span-full">
+              <h2 class="section-title">Run Governance Actions</h2>
+              <div class="row">
+                <button id="refreshRuns" class="btn btn-secondary">Refresh Runs</button>
+                <label for="actorRole" class="field-label">Actor</label>
+                <select id="actorRole">
+                  <option value="reviewer">Human Reviewer</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div id="runsStatus" class="status muted"></div>
+              <ul id="runs" class="item-list"></ul>
+              <h3 class="subsection-title">Selected Run / Branch Diff</h3>
+              <pre id="runDetail" class="code-block"></pre>
+            </section>
+          </div>
+        </section>
 
-      <section class="card">
-        <h2>Agent Run Actions</h2>
-        <div class="row">
-          <input id="contentTopic" placeholder="Blog topic (optional)" />
-        </div>
-        <div class="row">
-          <label for="gtmProduct">Prospect Product</label>
-          <select id="gtmProduct">
-            <option value="">Auto-select from approved products (default)</option>
-          </select>
-        </div>
-        <div class="row">
-          <button id="contentAgentBtn">Generate Blog Draft</button>
-          <button id="gtmAgentBtn">Generate Prospect Brief</button>
-        </div>
-        <div id="agentStatus" class="status muted"></div>
-        <pre id="agentOutput"></pre>
-      </section>
-    </main>
+        <section class="band band--mist">
+          <div class="band-inner">
+            <section class="card span-full">
+              <h2 class="section-title">Hybrid Search</h2>
+              <div class="row">
+                <input id="searchInput" placeholder="Search approved main data (hybrid vector + BM25)..." />
+                <button id="searchBtn" class="btn btn-primary">Search</button>
+              </div>
+              <div id="searchMeta" class="status muted"></div>
+              <ul id="searchResults" class="item-list"></ul>
+            </section>
+          </div>
+        </section>
 
-    <script src="/app.js?v=2026-07-07-agent-inputs-1"></script>
+        <section class="band band--fog">
+          <div class="band-inner grid-2">
+            <section class="card">
+              <h2 class="section-title">Entity Browser Tabs + Filters</h2>
+              <div class="tabs">
+                <button data-tab="products" class="tab active">Products</button>
+                <button data-tab="proof_points" class="tab">Proof Points</button>
+                <button data-tab="features" class="tab">Features</button>
+                <button data-tab="icp" class="tab">ICP Segments</button>
+                <button data-tab="personas" class="tab">Personas</button>
+              </div>
+              <input id="entityFilter" placeholder="Filter current tab..." />
+              <pre id="entities" class="code-block"></pre>
+            </section>
+
+            <section class="card card--elevated">
+              <h2 class="section-title">Recent Changes</h2>
+              <p class="muted section-lead">Commits and run branches with actor and time.</p>
+              <div class="split-list">
+                <div>
+                  <h3 class="subsection-title">Branches</h3>
+                  <ul id="recentBranches" class="item-list"></ul>
+                </div>
+                <div>
+                  <h3 class="subsection-title">Commits</h3>
+                  <ul id="recentCommits" class="item-list"></ul>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="band band--mist">
+          <div class="band-inner grid-2">
+            <section class="card">
+              <h2 class="section-title">Role Scope Check</h2>
+              <button id="scopeBtn" class="btn btn-secondary">Check Visibility</button>
+              <div id="scopeStatus" class="status muted"></div>
+              <pre id="scopeResults" class="code-block"></pre>
+            </section>
+
+            <section class="card">
+              <h2 class="section-title">Agent Run Actions</h2>
+              <div class="row">
+                <input id="contentTopic" placeholder="Blog topic (optional)" />
+              </div>
+              <div class="row">
+                <label for="gtmProduct" class="field-label">Prospect Product</label>
+                <select id="gtmProduct">
+                  <option value="">Auto-select from approved products (default)</option>
+                </select>
+              </div>
+              <div class="row">
+                <button id="contentAgentBtn" class="btn btn-primary">Generate Blog Draft</button>
+                <button id="gtmAgentBtn" class="btn btn-secondary">Generate Prospect Brief</button>
+              </div>
+              <div id="agentStatus" class="status muted"></div>
+              <pre id="agentOutput" class="code-block"></pre>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js?v=2026-07-08-steep-1"></script>
   </body>
 </html>
