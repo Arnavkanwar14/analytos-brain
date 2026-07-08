@@ -72,6 +72,17 @@ def _gemini_embed(text: str) -> list[float]:
     return _l2(d["embedding"]["values"])
 
 
+def _as_text(value) -> str:
+    """Coerce embedding source values to a single string (LLM may return lists)."""
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list):
+        return " ".join(_as_text(v) for v in value if v is not None).strip()
+    return str(value)
+
+
 def _cache_path(text: str) -> pathlib.Path:
     key = hashlib.sha256(f"{MODEL}\x00{DIM}\x00{text}".encode()).hexdigest()[:20]
     return CACHE_DIR / f"{key}.json"
@@ -80,7 +91,7 @@ def _cache_path(text: str) -> pathlib.Path:
 def embed_text(text: str, log=print) -> tuple[list[float], str]:
     """Return (vector, provider). provider in {gemini, cache:gemini, mock}."""
     global _gemini_disabled
-    text = (text or "").strip()
+    text = _as_text(text).strip()
     if not text:
         return _mock_vector("<empty>"), "mock"
     cp = _cache_path(text)
