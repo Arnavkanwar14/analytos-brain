@@ -69,12 +69,26 @@ async function withAction(statusId, label, fn) {
   }
 }
 
+function updateHeroStats(stats, health) {
+  const k = stats?.knowledge || {};
+  const m = stats?.market || {};
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value ?? "—";
+  };
+  set("heroStatProducts", k.products ?? 0);
+  set("heroStatProofPoints", k.proof_points ?? 0);
+  set("heroStatIcp", m.icp_segments ?? 0);
+  set("heroHealthSnippet", health?.status ? `status: ${health.status}` : "status: ok");
+}
+
 async function loadHealthAndStats() {
   await withAction("healthMsg", "Loading health", async () => {
     const health = await j("/api/health");
     const stats = await j("/api/stats");
     show("health", `status: ${health.status || "ok"}`);
     show("stats", stats);
+    updateHeroStats(stats, health);
   });
 }
 
