@@ -4,26 +4,30 @@ Provider: `groq:llama-3.1-8b-instant`
 
 ## Draft Blog Post
 
-**Unlock Efficiency and Accuracy in Discrete Manufacturing with Analytos**
+### How does Stockly Monte Carlo safety stock work and what customer outcome supports it?
 
-As a discrete manufacturer, you're constantly seeking ways to optimize your processes, reduce waste, and improve quality. Two innovative solutions from Analytos can help you achieve these goals: Inspectly and Stockly.
+Stockly is a Pull Kanban inventory intelligence platform designed for discrete manufacturing. One of its key features is the Monte Carlo safety-stock simulation, which helps plants stop carrying excess inventory without risking stockouts. In this article, we'll delve into how Stockly Monte Carlo safety stock works and explore a customer outcome that supports its effectiveness.
 
-**Automate Inspection Planning with Inspectly**
+#### What is Monte Carlo safety-stock simulation?
 
-Inspectly is an engineering drawing to inspection plan automation tool that streamlines the inspection planning process. By reading engineering drawings and automatically generating ballooned inspection plan workbooks in Excel, Inspectly saves you time and reduces errors. Key benefits include:
+According to Stockly's Monte Carlo safety-stock simulation feature, "Runs 10,000 demand/lead-time scenarios per SKU nightly to recommend optimal safety stock instead of static min/max rules." This means that the simulation generates a large number of random demand and lead-time scenarios for each SKU, allowing Stockly to calculate the optimal safety stock levels that minimize the risk of stockouts while avoiding excess inventory.
 
-* **92% first-pass dimension extraction accuracy**: Inspectly's AI-driven engine accurately extracts dimensions from engineering drawings, minimizing the need for manual verification.
-* **Inspection plan creation time reduced by 98%**: With Inspectly, inspection plan creation time is reduced from 4-6 hours per part to under 20 minutes, freeing up resources for more critical tasks.
-* **Supports ISO 13485 and AS9100 quality documentation contexts**: Inspectly ensures compliance with industry-standard quality documentation requirements, giving you peace of mind.
+#### How does Stockly Monte Carlo safety stock work?
 
-**Optimize Inventory Management with Stockly**
+The Monte Carlo simulation is a key component of Stockly's Pull Kanban engine. Here's a high-level overview of how it works:
 
-Stockly is a Pull Kanban inventory intelligence engine that helps you right-size kanban loops and safety stock, reducing excess inventory and minimizing the risk of stockouts. Key benefits include:
+1. Stockly collects data on demand and lead times for each SKU.
+2. The Monte Carlo simulation generates 10,000 random demand and lead-time scenarios for each SKU.
+3. Stockly calculates the optimal safety stock levels for each SKU based on the simulation results.
+4. The recommended safety stock levels are then used to adjust the kanban loops and replenishment signals.
 
-* **21% reduction in on-hand inventory value**: Stockly's AI-driven engine helps you optimize inventory levels, resulting in significant cost savings.
-* **Inventory planner time on replenishment reviews cut by 83%**: With Stockly, inventory planners can focus on higher-value tasks, as replenishment reviews are automated and streamlined.
-* **35% fewer stockout events**: Stockly's advanced analytics and optimization capabilities help you avoid stockouts and ensure a smooth supply chain.
+#### Customer outcome supporting Stockly Monte Carlo safety stock
 
-**Get Started with Analytos Today**
+A Midwest precision machining pilot achieved a 21% reduction in on-hand inventory value within 90 days, with a revenue of $120M and ~3,400 active SKUs. This outcome demonstrates the effectiveness of Stockly's Monte Carlo safety-stock simulation in reducing inventory levels while minimizing the risk of stockouts.
 
-Don't let manual processes and inefficiencies hold you back. Explore Inspectly and Stockly today and discover how Analytos can help you achieve your discrete manufacturing goals. Visit [inspectly.analytos.ai](http://inspectly.analytos.ai) and [stockly.analytos.ai](http://stockly.analytos.ai) to learn more.
+### Sources
+
+* `stockly-monte-carlo-safety-stock`: Monte Carlo safety-stock simulation feature description
+* `stockly-inventory-value-reduction`: Customer outcome supporting Stockly Monte Carlo safety stock
+* `stockly`: Stockly product overview
+* `stockly-product-overview.md`: Source document for Stockly product overview

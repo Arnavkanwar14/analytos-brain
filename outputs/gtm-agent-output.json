@@ -3,87 +3,55 @@
   "output": {
     "target_accounts": [
       {
-        "revenue_min_musd": 50.0,
-        "revenue_max_musd": 500.0,
-        "employees_range": "100-2,000 employees; 1-6 plants",
-        "sectors": [
-          "precision machining",
-          "medical device manufacturing",
-          "industrial equipment",
-          "packaging",
-          "automotive tier-2 suppliers",
-          "electronics assembly",
-          "aerospace suppliers"
-        ],
-        "erp_footprint": [
-          "NetSuite",
-          "SAP Business One",
-          "Epicor",
-          "Infor"
-        ],
-        "geography": "US first (Midwest/Southeast manufacturing belts), then EU",
-        "trigger_signals": [
-          "still running kanban on physical cards or Excel min/max",
-          "inventory write-downs or working-capital pressure from board/PE owner",
-          "hiring posts for inventory planners or quality engineers",
-          "ISO 13485 / AS9100 certified or pursuing, with manual FAI/inspection documentation",
-          "recent NetStock evaluation or churn"
-        ],
-        "disqualifiers": [
-          "process/continuous manufacturing (chemicals, food)",
-          "revenue < $30M",
-          "Fortune 500 (procurement cycle too long)",
-          "homegrown ERP with no API access"
-        ],
-        "name": "Mid-Market Discrete Manufacturers (direct)"
+        "slug": "icp-mid-market-discrete-manufacturers",
+        "name": "Mid-Market Discrete Manufacturers (direct)",
+        "description": "Primary direct-sales segment for Stockly and Inspectly."
       },
       {
-        "revenue_min_musd": null,
-        "revenue_max_musd": null,
-        "employees_range": null,
-        "sectors": null,
-        "erp_footprint": null,
-        "geography": null,
-        "trigger_signals": [
-          "lower-middle-market PE fund with 3+ manufacturing portfolio companies",
-          "board/PE working-capital pressure across portfolio"
-        ],
-        "disqualifiers": null,
-        "name": "PE Firms & Operating Partners (multiplier channel)"
+        "slug": "icp-pe-firms-operating-partners",
+        "name": "PE Firms & Operating Partners (multiplier channel)",
+        "description": "Lower-middle-market PE funds with 3+ manufacturing portfolio companies. Pitch: build once, deploy across the portfolio; one POC at a lighthouse portfolio company then standardized rollout."
       }
     ],
     "segment_rationale": [
-      "Primary direct-sales segment for Stockly and Inspectly.",
-      "Lower-middle-market PE funds with 3+ manufacturing portfolio companies. Pitch: build once, deploy across the portfolio; one POC at a lighthouse portfolio company then standardized rollout."
+      "still running kanban on physical cards or Excel min/max",
+      "inventory write-downs or working-capital pressure from board/PE owner",
+      "hiring posts for inventory planners or quality engineers",
+      "ISO 13485 / AS9100 certified or pursuing, with manual FAI/inspection documentation",
+      "recent NetStock evaluation or churn"
     ],
     "outreach_angles": [
       {
+        "slug": "persona-cfo-pe-operating-partner",
+        "name": "CFO / PE Operating Partner",
         "role_in_deal": "Economic buyer",
         "cares_about": "EBITDA, capex vs opex, risk",
         "winning_message": "Working capital release + perpetual license, 2-week POC proof",
-        "losing_message": "Vague ROI",
-        "name": "CFO / PE Operating Partner"
+        "losing_message": "Vague ROI"
       },
       {
+        "slug": "persona-plant-manager",
+        "name": "Plant Manager",
         "role_in_deal": "Champion (Stockly)",
         "cares_about": "Stockouts, expediting chaos, floor discipline",
         "winning_message": "Fewer stockouts, less firefighting, your planners get their week back",
-        "losing_message": "AI transformation",
-        "name": "Plant Manager"
+        "losing_message": "AI transformation"
       },
       {
+        "slug": "persona-quality-manager",
+        "name": "Quality Manager / Engineer",
         "role_in_deal": "Champion (Inspectly)",
         "cares_about": "Audit readiness, documentation backlog",
         "winning_message": "4-6 hours per inspection plan down to 20 minutes, engineer stays in the loop",
-        "losing_message": "Replace your team",
-        "name": "Quality Manager / Engineer"
+        "losing_message": "Replace your team"
       },
       {
+        "slug": "persona-supply-chain-director",
+        "name": "Supply Chain Director",
         "role_in_deal": "Champion/buyer (Stockly)",
         "cares_about": "Inventory turns, working capital",
         "winning_message": "21% inventory reduction in 90 days at a shop like yours",
-        "losing_message": "Feature lists",
-        "name": "Supply Chain Director"
+        "losing_message": "Feature lists"
       }
     ]
   }
