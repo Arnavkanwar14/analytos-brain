@@ -13,12 +13,13 @@ import time
 sys.path.insert(0, "/root/analytos-brain")
 
 from fastapi import FastAPI, HTTPException, Body, Query, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
+import requests
 from fastapi.staticfiles import StaticFiles
 import pathlib
 
 from common.og import OG, OGError
-from common import review
+from common import config, review
 from common.diff import compute_diff
 from pipeline.run import run_ingestion
 from scripts import run_content_agent, run_gtm_agent
@@ -460,6 +461,42 @@ def generate_prospect_brief(payload: dict = Body(default={})):
         raise HTTPException(400, f"gtm agent failed: {e}")
     out = ROOT / "outputs" / "gtm-agent-output.json"
     return {"ok": True, "type": "prospect-brief", "result": out.read_text() if out.exists() else "{}"}
+
+
+
+# ----------------------------------------------------------- Omnigraph MCP proxy
+# HF Spaces only expose FastAPI on :7860; Omnigraph binds 127.0.0.1:8080 inside
+# the container. This is a dumb authenticated pipe so hosted MCP clients can
+# reach Omni via /mcp-proxy/* — Authorization is forwarded verbatim (Cedar gate).
+@app.api_route(
+    "/mcp-proxy/{path:path}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+)
+async def mcp_proxy(path: str, request: Request):
+    base = config.resolve_omnigraph_base_url().rstrip("/")
+    url = f"{base}/{path}"
+    if request.url.query:
+        url = f"{url}?{request.url.query}"
+    headers = {}
+    auth = request.headers.get("authorization")
+    if auth:
+        headers["authorization"] = auth
+    ct = request.headers.get("content-type")
+    if ct:
+        headers["content-type"] = ct
+    body = await request.body()
+    upstream = requests.request(
+        request.method,
+        url,
+        headers=headers,
+        data=body if body else None,
+        timeout=60,
+    )
+    return Response(
+        content=upstream.content,
+        status_code=upstream.status_code,
+        media_type=upstream.headers.get("content-type"),
+    )
 
 
 # ------------------------------------------------------------------------ static

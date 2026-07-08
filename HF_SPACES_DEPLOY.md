@@ -37,3 +37,12 @@ This supports Spaces ephemeral storage by rebuilding local runtime state on boot
 - `/` renders dashboard + HITL
 - `/api/search?q=stock` returns hybrid results (or lexical fallback if embedder unavailable)
 
+## 5) Hosted MCP (Omnigraph proxy)
+
+Omnigraph stays on `127.0.0.1:8080` inside the container. FastAPI exposes a dumb authenticated proxy:
+
+- Base URL: `https://arnavkanwar-analytos-brain-v3.hf.space/mcp-proxy` (no trailing slash)
+- Client paths: `{base}/{omnigraph-path}` e.g. `/mcp-proxy/healthz` — avoid `//` by not doubling slashes
+- MCP configs: `mcp/content-agent.mcp.json`, `mcp/gtm-agent.mcp.json` use that `--base-url`
+- Tokens: `${TOKEN_CONTENT_AGENT}` / `${TOKEN_GTM_AGENT}` (Space secrets); Authorization forwarded verbatim; Cedar remains the gate
+

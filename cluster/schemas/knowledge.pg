@@ -1,3 +1,14 @@
+// Query grammar (.gq) cheat sheet — schema_get returns this .pg only; .gq files are not exposed.
+// Shape: query name($p: Type) { match { $v: NodeType { field: $p } } return { $v.field1, $v.field2 } order { $v.field asc } limit N }
+// Worked example (list_approved_proof_points from cluster/queries/knowledge):
+//   query list_approved_proof_points() {
+//     match { $pp: ProofPoint { approved_external: true } }
+//     return { $pp.slug, $pp.statement, $pp.product_slug, $pp.metric, $pp.magnitude, $pp.unit,
+//              $pp.direction, $pp.value_before, $pp.value_after, $pp.window, $pp.source_doc }
+//     limit 200
+//   }
+// Hybrid search uses: order { rrf(nearest($x.embedding, $q), bm25($x.field, $q)) } with required trailing limit N
+
 // Analytos Brain :: KNOWLEDGE graph
 // External-approved product truth. Readable by content-agent + gtm-agent + humans.
 // Comments use // (never #). Types Uppercase, edges PascalCase (traversed lowerCamelCase).

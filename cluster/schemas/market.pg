@@ -1,3 +1,17 @@
+// Query grammar (.gq) cheat sheet — schema_get returns this .pg only; .gq files are not exposed.
+// Shape: query name($p: Type) { match { $v: NodeType { field: $p } } return { $v.field1, $v.field2 } order { $v.field asc } limit N }
+// Worked example (list_icp_segments from cluster/queries/market):
+//   query list_icp_segments() {
+//     match { $s: ICPSegment }
+//     return { $s.slug, $s.name, $s.description, $s.channel,
+//              $s.revenue_min_musd, $s.revenue_max_musd, $s.employees_range,
+//              $s.sectors, $s.erp_footprint, $s.geography,
+//              $s.trigger_signals, $s.disqualifiers, $s.applies_to_products }
+//     order { $s.slug asc }
+//     limit 100
+//   }
+// Hybrid search uses: order { rrf(nearest($x.embedding, $q), bm25($x.field, $q)) } with required trailing limit N
+
 // Analytos Brain :: MARKET graph
 // ICP + personas. Readable by gtm-agent + humans (content-agent is denied here).
 // Product links are slug references into the KNOWLEDGE graph (cross-graph edges

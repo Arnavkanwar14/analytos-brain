@@ -69,6 +69,8 @@ POC for the Analytos Omnigraph assignment implementing:
 
 ## MCP Role Configs + Cedar Scope
 
+- Hosted MCP `--base-url`: `https://arnavkanwar-analytos-brain-v3.hf.space/mcp-proxy` (no trailing slash; FastAPI proxies to Omnigraph on `:8080`)
+- Local demo still works with `--base-url http://127.0.0.1:8080` (direct Omnigraph)
 - `mcp/content-agent.mcp.json` uses `TOKEN_CONTENT_AGENT`
 - `mcp/gtm-agent.mcp.json` uses `TOKEN_GTM_AGENT`
 - Cedar policies enforce:

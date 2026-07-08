@@ -6,7 +6,7 @@
         "-y",
         "@modernrelay/omnigraph-mcp",
         "--base-url",
-        "http://127.0.0.1:8080",
+        "https://arnavkanwar-analytos-brain-v3.hf.space/mcp-proxy",
         "--token",
         "${TOKEN_GTM_AGENT}"
       ]
