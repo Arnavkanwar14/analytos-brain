@@ -8,6 +8,7 @@ The MCP server is the *other* read layer and is Cedar-gated separately.
 from __future__ import annotations
 import sys, io, contextlib
 import random
+import re
 import time
 sys.path.insert(0, "/root/analytos-brain")
 
@@ -27,6 +28,18 @@ STATIC = pathlib.Path(__file__).resolve().parent / "static"
 
 app = FastAPI(title="Analytos Brain", version="1.0")
 admin = OG("admin")
+
+RUN_ID_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+
+
+def _validate_run_id(run_id: str | None) -> None:
+    if run_id is None:
+        return
+    if not isinstance(run_id, str) or not RUN_ID_RE.match(run_id):
+        raise HTTPException(
+            400,
+            "run_id must contain only letters, numbers, -, _, . — no spaces",
+        )
 
 
 def _is_concurrent_modification_error(exc: Exception) -> bool:
@@ -394,6 +407,7 @@ def run_diff(run_id: str, branch: str | None = Query(default=None)):
 def ingest(payload: dict = Body(default={})):
     docs = payload.get("docs")
     run_id = payload.get("run_id")
+    _validate_run_id(run_id)
     use_llm = bool(payload.get("use_llm", False))
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):

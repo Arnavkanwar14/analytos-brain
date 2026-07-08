@@ -282,8 +282,14 @@ async function viewRunDiff(runId, branch) {
   show("runDetail", data);
 }
 
+function sanitizeRunId(raw) {
+  return raw.trim().replace(/\s+/g, "-");
+}
+
 async function ingestRun() {
-  const runId = document.getElementById("ingestRunId").value.trim();
+  const input = document.getElementById("ingestRunId");
+  const runId = sanitizeRunId(input.value);
+  if (input.value !== runId) input.value = runId;
   const docsRaw = document.getElementById("ingestDocs").value.trim();
   const docs = docsRaw ? docsRaw.split(",").map((d) => d.trim()).filter(Boolean) : undefined;
   const useLlm = document.getElementById("ingestUseLlm").checked;
