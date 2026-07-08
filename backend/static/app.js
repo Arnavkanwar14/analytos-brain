@@ -3,6 +3,51 @@ const state = {
   entities: [],
 };
 
+function $(id) {
+  return document.getElementById(id);
+}
+
+function bindClick(id, handler) {
+  const el = $(id);
+  if (!el) {
+    console.warn(`Missing element #${id}; click handler not bound.`);
+    return false;
+  }
+  el.onclick = handler;
+  return true;
+}
+
+function bindEvent(id, event, handler) {
+  const el = $(id);
+  if (!el) {
+    console.warn(`Missing element #${id}; ${event} handler not bound.`);
+    return false;
+  }
+  el.addEventListener(event, handler);
+  return true;
+}
+
+function bindControls() {
+  bindClick("searchBtn", runSearch);
+  bindEvent("searchInput", "keydown", (e) => {
+    if (e.key === "Enter") runSearch();
+  });
+  bindEvent("entityFilter", "input", applyEntityFilter);
+  bindClick("refreshRuns", loadRuns);
+  bindClick("ingestBtn", ingestRun);
+  bindClick("scopeBtn", checkRoleScope);
+  bindClick("contentAgentBtn", runContentAgent);
+  bindClick("gtmAgentBtn", runGtmAgent);
+
+  for (const tab of document.querySelectorAll(".tab")) {
+    tab.onclick = async () => {
+      for (const x of document.querySelectorAll(".tab")) x.classList.remove("active");
+      tab.classList.add("active");
+      await loadEntities(tab.dataset.tab);
+    };
+  }
+}
+
 async function j(url, opts = {}) {
   const response = await fetch(url, {
     headers: { "content-type": "application/json", ...(opts.headers || {}) },
@@ -16,19 +61,22 @@ async function j(url, opts = {}) {
 }
 
 function show(id, value) {
-  document.getElementById(id).textContent =
-    typeof value === "string" ? value : JSON.stringify(value, null, 2);
+  const el = $(id);
+  if (!el) return;
+  el.textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2);
 }
 
 function setStatus(id, message, kind = "muted") {
-  const el = document.getElementById(id);
+  const el = $(id);
+  if (!el) return;
   const baseClass = id === "globalStatus" ? "status-badge" : "status";
   el.className = `${baseClass} ${kind}`;
   el.textContent = message;
 }
 
 function setStatusHtml(id, html, kind = "muted") {
-  const el = document.getElementById(id);
+  const el = $(id);
+  if (!el) return;
   const baseClass = id === "globalStatus" ? "status-badge" : "status";
   el.className = `${baseClass} ${kind}`;
   el.innerHTML = html;
@@ -106,15 +154,17 @@ async function loadEntities(kind = state.activeTab) {
 }
 
 function applyEntityFilter() {
-  const term = document.getElementById("entityFilter").value.trim().toLowerCase();
+  const filter = $("entityFilter");
+  if (!filter) return;
+  const term = filter.value.trim().toLowerCase();
   if (!term) {
-    show("entities", state.entities);
+    show("entitiesOutput", state.entities);
     return;
   }
   const filtered = (state.entities || []).filter((x) =>
     JSON.stringify(x).toLowerCase().includes(term)
   );
-  show("entities", filtered);
+  show("entitiesOutput", filtered);
 }
 
 async function loadRecent() {
@@ -318,27 +368,17 @@ async function boot() {
   await loadRecent();
   await loadRuns();
   await checkRoleScope();
-
-  document.getElementById("searchBtn").onclick = runSearch;
-  document.getElementById("searchInput").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") runSearch();
-  });
-  document.getElementById("entityFilter").addEventListener("input", applyEntityFilter);
-  document.getElementById("refreshRuns").onclick = loadRuns;
-  document.getElementById("ingestBtn").onclick = ingestRun;
-  document.getElementById("scopeBtn").onclick = checkRoleScope;
-  document.getElementById("contentAgentBtn").onclick = runContentAgent;
-  document.getElementById("gtmAgentBtn").onclick = runGtmAgent;
-
-  for (const tab of document.querySelectorAll(".tab")) {
-    tab.onclick = async () => {
-      for (const x of document.querySelectorAll(".tab")) x.classList.remove("active");
-      tab.classList.add("active");
-      await loadEntities(tab.dataset.tab);
-    };
-  }
 }
 
-boot().catch((e) => {
-  setStatus("globalStatus", `Failed to load dashboard: ${e.message}`, "error");
-});
+function start() {
+  bindControls();
+  boot().catch((e) => {
+    setStatus("globalStatus", `Failed to load dashboard: ${e.message}`, "error");
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", start);
+} else {
+  start();
+}
